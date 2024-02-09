@@ -1,0 +1,9 @@
+*
+!/.gitignore
+!/go.mod
+!/go.sum
+!/LICENSE
+!*.go
+!*.html
+!*.md
+!*/
