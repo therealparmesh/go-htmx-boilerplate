@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
@@ -18,24 +19,17 @@ type Todo struct {
 	Content   string
 }
 
+var tmpl *template.Template
 var db *sql.DB
-
-func executeTemplate(w http.ResponseWriter, data any, files ...string) error {
-	tmpl, err := template.ParseFiles(files...)
-
-	if err != nil {
-		return err
-	}
-
-	return tmpl.Execute(w, data)
-}
-
-func writeError(w http.ResponseWriter, status int) {
-	http.Error(w, http.StatusText(status), status)
-}
 
 func main() {
 	var err error
+	tmpl, err = template.ParseFiles("templates.html")
+
+	if err != nil {
+		panic(err)
+	}
+
 	db, err = sql.Open("sqlite3", "file:sqlite.db")
 
 	if err != nil {
@@ -54,14 +48,16 @@ func main() {
 		panic(err)
 	}
 
-	_, err = statement.Exec()
+	statement.Exec()
 
-	if err != nil {
-		panic(err)
+	port := os.Getenv("PORT")
+
+	if port == "" {
+		port = "3333"
 	}
 
 	r := chi.NewRouter()
-	addr := ":3333"
+	addr := ":" + port
 
 	r.Use(middleware.Logger)
 	r.Get("/", RootRoute)
@@ -69,51 +65,32 @@ func main() {
 	r.Post("/todos", TodosRoute)
 	r.Patch("/todos/{id}", TodoRoute)
 	fmt.Printf("Server is running at http://localhost%v\n", addr)
-
-	err = http.ListenAndServe(addr, r)
-
-	if err != nil {
-		panic(err)
-	}
+	http.ListenAndServe(addr, r)
 }
 
 func RootRoute(w http.ResponseWriter, r *http.Request) {
-	err := executeTemplate(w, nil, "templates/index.html", "templates/root.html")
-
-	if err != nil {
-		writeError(w, http.StatusInternalServerError)
-	}
+	tmpl.ExecuteTemplate(w, "root", nil)
 }
 
 func TodosRoute(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
-		err := r.ParseForm()
-
-		if err != nil {
-			writeError(w, http.StatusBadRequest)
-			return
-		}
+		r.ParseForm()
 
 		content := r.FormValue("content")
 		statement, err := db.Prepare("INSERT INTO todos (completed, content) VALUES (?, ?)")
 
 		if err != nil {
-			writeError(w, http.StatusInternalServerError)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
 
-		_, err = statement.Exec(false, content)
-
-		if err != nil {
-			writeError(w, http.StatusInternalServerError)
-			return
-		}
+		statement.Exec(false, content)
 	}
 
 	rows, err := db.Query("SELECT * FROM todos")
 
 	if err != nil {
-		writeError(w, http.StatusInternalServerError)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 
@@ -123,70 +100,40 @@ func TodosRoute(w http.ResponseWriter, r *http.Request) {
 
 	for rows.Next() {
 		var todo Todo
-		err = rows.Scan(&todo.ID, &todo.Completed, &todo.Content)
 
-		if err != nil {
-			writeError(w, http.StatusInternalServerError)
-			return
-		}
+		rows.Scan(&todo.ID, &todo.Completed, &todo.Content)
 
 		todos = append(todos, todo)
 	}
 
-	err = executeTemplate(w, todos, "templates/todos-list.html", "templates/todo-item.html")
-
-	if err != nil {
-		writeError(w, http.StatusInternalServerError)
-	}
+	tmpl.ExecuteTemplate(w, "todos-list", todos)
 }
 
 func TodoRoute(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 
 	if err != nil {
-		writeError(w, http.StatusBadRequest)
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
 
 	if r.Method == "PATCH" {
-		err := r.ParseForm()
-
-		if err != nil {
-			writeError(w, http.StatusBadRequest)
-			return
-		}
+		r.ParseForm()
 
 		completed := r.FormValue("completed") == "on"
 		statement, err := db.Prepare("UPDATE todos SET completed = ? WHERE id = ?")
 
 		if err != nil {
-			writeError(w, http.StatusInternalServerError)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
 
-		_, err = statement.Exec(completed, id)
-
-		if err != nil {
-			writeError(w, http.StatusInternalServerError)
-			return
-		}
+		statement.Exec(completed, id)
 	}
 
 	row := db.QueryRow("SELECT * FROM todos WHERE id = ?", id)
 	var todo Todo
-	err = row.Scan(&todo.ID, &todo.Completed, &todo.Content)
 
-	if err == sql.ErrNoRows {
-		writeError(w, http.StatusNotFound)
-		return
-	} else if err != nil {
-		writeError(w, http.StatusInternalServerError)
-		return
-	}
-
-	err = executeTemplate(w, todo, "templates/todos-list-item.html", "templates/todo-item.html")
-
-	if err != nil {
-		writeError(w, http.StatusInternalServerError)
-	}
+	row.Scan(&todo.ID, &todo.Completed, &todo.Content)
+	tmpl.ExecuteTemplate(w, "todo-item", todo)
 }
