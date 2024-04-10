@@ -24,7 +24,7 @@ var db *sql.DB
 
 func main() {
 	var err error
-	tmpl, err = template.ParseFiles("templates.html")
+	tmpl, err = template.ParseFiles("templates.gohtml")
 	if err != nil {
 		panic(err)
 	}

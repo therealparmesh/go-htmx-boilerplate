@@ -4,5 +4,5 @@
 !/go.sum
 !/LICENSE
 !*.go
-!*.html
+!*.gohtml
 !*.md
