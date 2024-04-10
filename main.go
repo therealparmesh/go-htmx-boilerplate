@@ -25,13 +25,11 @@ var db *sql.DB
 func main() {
 	var err error
 	tmpl, err = template.ParseFiles("templates.html")
-
 	if err != nil {
 		panic(err)
 	}
 
 	db, err = sql.Open("sqlite3", "file:sqlite.db")
-
 	if err != nil {
 		panic(err)
 	}
@@ -43,7 +41,6 @@ func main() {
 		completed BOOLEAN NOT NULL,
 		content TEXT NOT NULL
 	)`)
-
 	if err != nil {
 		panic(err)
 	}
@@ -68,7 +65,7 @@ func main() {
 	http.ListenAndServe(addr, r)
 }
 
-func RootRoute(w http.ResponseWriter, r *http.Request) {
+func RootRoute(w http.ResponseWriter, _ *http.Request) {
 	tmpl.ExecuteTemplate(w, "root", nil)
 }
 
@@ -78,7 +75,6 @@ func TodosRoute(w http.ResponseWriter, r *http.Request) {
 
 		content := r.FormValue("content")
 		statement, err := db.Prepare("INSERT INTO todos (completed, content) VALUES (?, ?)")
-
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
@@ -88,7 +84,6 @@ func TodosRoute(w http.ResponseWriter, r *http.Request) {
 	}
 
 	rows, err := db.Query("SELECT * FROM todos")
-
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
@@ -111,7 +106,6 @@ func TodosRoute(w http.ResponseWriter, r *http.Request) {
 
 func TodoRoute(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
-
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
@@ -122,7 +116,6 @@ func TodoRoute(w http.ResponseWriter, r *http.Request) {
 
 		completed := r.FormValue("completed") == "on"
 		statement, err := db.Prepare("UPDATE todos SET completed = ? WHERE id = ?")
-
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
