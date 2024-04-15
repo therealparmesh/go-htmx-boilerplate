@@ -1,0 +1,22 @@
+{
+  "type": "module",
+  "scripts": {
+    "build": "bun run build:css && bun run build:ts",
+    "build:css": "NODE_ENV=production bunx --bun tailwindcss --input ./main.css --output ./static/main.css --minify",
+    "build:ts": "bunx --bun tsc && NODE_ENV=production bun build ./main.ts --outdir=./static --minify",
+    "dev": "bunx --bun concurrently \"bun run dev:css\" \"bun run dev:ts\" --kill-others",
+    "dev:css": "NODE_ENV=development bunx --bun tailwindcss --input ./main.css --output ./static/main.css --watch",
+    "dev:ts": "NODE_ENV=development bun build ./main.ts --outdir=./static --watch"
+  },
+  "dependencies": {
+    "htmx.org": "^1.9.11"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.0.12",
+    "concurrently": "^8.2.2",
+    "prettier": "^3.2.5",
+    "prettier-plugin-go-template": "^0.0.15",
+    "tailwindcss": "^3.4.3",
+    "typescript": "^5.4.5"
+  }
+}

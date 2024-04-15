@@ -1,8 +1,15 @@
 *
 !/.gitignore
+!/bun.lockb
 !/go.mod
 !/go.sum
 !/LICENSE
+!/Makefile
+!*.css
 !*.go
 !*.gohtml
+!*.js
+!*.json
 !*.md
+!*.toml
+!*.ts

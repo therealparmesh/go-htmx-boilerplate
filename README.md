@@ -1,6 +1,19 @@
 # go-htmx-boilerplate
 
-```bash
-go mod tidy
-go run .
+## Setup
+
+```sh
+make setup
+```
+
+## Dev
+
+```sh
+make dev
+```
+
+## Build
+
+```sh
+make build
 ```

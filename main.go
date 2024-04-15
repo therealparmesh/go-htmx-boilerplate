@@ -24,7 +24,7 @@ var db *sql.DB
 
 func main() {
 	var err error
-	tmpl, err = template.ParseFiles("templates.gohtml")
+	tmpl, err = template.ParseFiles("main.gohtml")
 	if err != nil {
 		panic(err)
 	}
@@ -33,7 +33,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
 	defer db.Close()
 
 	statement, err := db.Prepare(`CREATE TABLE IF NOT EXISTS todos (
@@ -48,20 +47,25 @@ func main() {
 	statement.Exec()
 
 	port := os.Getenv("PORT")
-
 	if port == "" {
 		port = "3333"
 	}
 
 	r := chi.NewRouter()
-	addr := ":" + port
+	addr := "localhost:" + port
 
 	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+	if os.Getenv("NODE_ENV") == "development" {
+		r.Use(middleware.NoCache)
+	}
+	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	r.Get("/", RootRoute)
 	r.Get("/todos", TodosRoute)
 	r.Post("/todos", TodosRoute)
 	r.Patch("/todos/{id}", TodoRoute)
-	fmt.Printf("Server is running at http://localhost%v\n", addr)
+	r.Delete("/todos/{id}", TodoRoute)
+	fmt.Printf("Server is running at http://%v\n", addr)
 	http.ListenAndServe(addr, r)
 }
 
@@ -88,7 +92,6 @@ func TodosRoute(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-
 	defer rows.Close()
 
 	var todos []Todo
@@ -111,19 +114,27 @@ func TodoRoute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if r.Method == "PATCH" {
-		r.ParseForm()
-
-		completed := r.FormValue("completed") == "on"
-		statement, err := db.Prepare("UPDATE todos SET completed = ? WHERE id = ?")
+	if r.Method == "DELETE" {
+		statement, err := db.Prepare("DELETE FROM todos WHERE id = ?")
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
 
-		statement.Exec(completed, id)
+		statement.Exec(id)
+		return
 	}
 
+	r.ParseForm()
+
+	completed := r.FormValue("completed") == "on"
+	statement, err := db.Prepare("UPDATE todos SET completed = ? WHERE id = ?")
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	statement.Exec(completed, id)
 	row := db.QueryRow("SELECT * FROM todos WHERE id = ?", id)
 	var todo Todo
 

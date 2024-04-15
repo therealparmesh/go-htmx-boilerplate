@@ -1,0 +1,5 @@
+[build]
+  cmd = "go build -o ./server"
+  full_bin = "NODE_ENV=development ./server"
+  include_ext = ["go", "gohtml"]
+  exclude_dir = ["node_modules", "static", "tmp"]
