@@ -2,6 +2,8 @@
 
 ## Setup
 
+Install [Go](https://go.dev/) and [Bun](https://bun.sh/).
+
 ```sh
 make setup
 ```
