@@ -9,13 +9,14 @@
     "dev:ts": "NODE_ENV=development bun build ./main.ts --outdir=./static --watch"
   },
   "dependencies": {
-    "htmx.org": "^1.9.11"
+    "htmx.org": "^1.9.12"
   },
   "devDependencies": {
-    "@types/bun": "^1.0.12",
+    "@types/bun": "^1.1.0",
     "concurrently": "^8.2.2",
     "prettier": "^3.2.5",
     "prettier-plugin-go-template": "^0.0.15",
+    "prettier-plugin-tailwindcss": "^0.5.14",
     "tailwindcss": "^3.4.3",
     "typescript": "^5.4.5"
   }

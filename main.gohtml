@@ -16,9 +16,9 @@
 {{ end }}
 
 {{ block "body-content" . }}
-  <main class="flex justify-center min-h-screen">
-    <div class="flex flex-col items-stretch gap-4 p-8 w-96">
-      <h1 class="text-lg font-bold text-center">todos</h1>
+  <main class="flex min-h-screen justify-center">
+    <div class="flex w-96 flex-col items-stretch gap-4 p-8">
+      <h1 class="text-center text-lg font-bold">todos</h1>
       <form
         hx-post="/todos"
         hx-target="#todo-list-container"
@@ -27,7 +27,7 @@
         class="flex flex-col"
       >
         <input
-          class="outline-none background-none"
+          class="background-none outline-none"
           id="new-todo-content"
           name="content"
           autocomplete="off"
@@ -49,7 +49,7 @@
 {{ end }}
 
 {{ block "todo-item" . }}
-  <li class="flex items-center gap-2 justify-stretch" id="todo-{{ .ID }}">
+  <li class="flex items-center justify-stretch gap-2" id="todo-{{ .ID }}">
     <input
       hx-patch="/todos/{{ .ID }}"
       hx-target="#todo-{{ .ID }}"

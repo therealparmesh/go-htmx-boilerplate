@@ -2,5 +2,5 @@
 export default {
   singleQuote: true,
   trailingComma: 'all',
-  plugins: ['prettier-plugin-go-template'],
+  plugins: ['prettier-plugin-go-template', 'prettier-plugin-tailwindcss'],
 };
