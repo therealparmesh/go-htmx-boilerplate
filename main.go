@@ -50,9 +50,8 @@ func main() {
 	if port == "" {
 		port = "3333"
 	}
-
-	r := chi.NewRouter()
 	addr := "localhost:" + port
+	r := chi.NewRouter()
 
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
@@ -87,14 +86,13 @@ func TodosRoute(w http.ResponseWriter, r *http.Request) {
 		statement.Exec(false, content)
 	}
 
+	var todos []Todo
 	rows, err := db.Query("SELECT * FROM todos")
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 	defer rows.Close()
-
-	var todos []Todo
 
 	for rows.Next() {
 		var todo Todo
@@ -135,8 +133,9 @@ func TodoRoute(w http.ResponseWriter, r *http.Request) {
 	}
 
 	statement.Exec(completed, id)
-	row := db.QueryRow("SELECT * FROM todos WHERE id = ?", id)
+
 	var todo Todo
+	row := db.QueryRow("SELECT * FROM todos WHERE id = ?", id)
 
 	row.Scan(&todo.ID, &todo.Completed, &todo.Content)
 	tmpl.ExecuteTemplate(w, "todo-item", todo)
