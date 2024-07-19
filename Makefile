@@ -6,7 +6,7 @@ setup:
 	@echo "Checking for bun..."
 	@command -v bun >/dev/null 2>&1 || { echo "bun is not installed. Aborting."; exit 1; }
 	@echo "Checking for air..."
-	@command -v air >/dev/null 2>&1 || { echo "air is not installed. Please install it by running `go install github.com/cosmtrek/air@latest`. Aborting."; exit 1; }
+	@command -v air >/dev/null 2>&1 || { echo "air is not installed. Please install it by running `go install github.com/air-verse/air@latest`. Aborting."; exit 1; }
 	@echo "Running `go mod tidy`..."
 	@go mod tidy
 	@echo "Running `bun install`..."
