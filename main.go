@@ -58,7 +58,7 @@ func main() {
 	if os.Getenv("NODE_ENV") == "development" {
 		r.Use(middleware.NoCache)
 	}
-	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("build"))))
 	r.Get("/", RootRoute)
 	r.Get("/todos", TodosRoute)
 	r.Post("/todos", TodosRoute)
