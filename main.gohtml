@@ -1,4 +1,4 @@
-{{ block "root" . }}
+{{ define "root" }}
   <!doctype html>
   <html lang="en">
     <head>
@@ -9,65 +9,106 @@
       <link href="./static/main.css" rel="stylesheet" />
       <script src="./static/main.js"></script>
     </head>
-    <body>
+    <body class="bg-white font-sans">
       {{ template "body-content" . }}
     </body>
   </html>
 {{ end }}
 
-{{ block "body-content" . }}
-  <main class="flex min-h-screen justify-center">
-    <div class="flex w-96 flex-col items-stretch gap-4 p-8">
-      <h1 class="text-center text-lg font-bold">todos</h1>
+{{ define "body-content" }}
+  <main class="flex min-h-screen items-center justify-center">
+    <section
+      class="flex w-full max-w-md flex-col gap-8 p-8"
+      aria-labelledby="main-header"
+    >
+      <h1 id="main-header" class="text-center text-4xl font-normal">todos</h1>
       <form
         hx-post="/todos"
         hx-target="#todo-list-container"
+        hx-swap="beforeend"
         hx-disabled-elt="#new-todo-content"
-        hx-on:htmx:after-request="this.reset()"
         class="flex flex-col"
+        aria-label="Add a new todo"
       >
         <input
-          class="background-none outline-none"
+          class="w-full border-b border-gray-300 text-xl placeholder-gray-400 focus:ring-0 disabled:opacity-50"
           id="new-todo-content"
           name="content"
           autocomplete="off"
-          placeholder="what needs to be done?"
+          placeholder="What needs to be done?"
           required
+          aria-required="true"
+          aria-describedby="new-todo-help"
         />
+        <p class="sr-only" id="new-todo-help">
+          Enter a todo to add it to the list
+        </p>
+        <script>
+          const form = me();
+
+          form.addEventListener('htmx:afterRequest', () => {
+            form.reset();
+          });
+        </script>
       </form>
-      <div hx-get="/todos" hx-trigger="load" id="todo-list-container"></div>
-    </div>
+      <ul
+        hx-get="/todos"
+        hx-trigger="load"
+        class="space-y-8"
+        id="todo-list-container"
+        aria-label="Todo list"
+        aria-live="polite"
+      ></ul>
+    </section>
   </main>
 {{ end }}
 
-{{ block "todos-list" . }}
-  <ul class="space-y-2">
-    {{ range . }}
-      {{ template "todo-item" . }}
-    {{ end }}
-  </ul>
+{{ define "todos-list" }}
+  {{ range . }}
+    {{ template "todo-item" . }}
+  {{ end }}
 {{ end }}
 
-{{ block "todo-item" . }}
-  <li class="flex items-center justify-stretch gap-2" id="todo-{{ .ID }}">
+{{ define "todo-item" }}
+  <li class="flex items-center gap-4" id="todo-{{ .ID }}">
     <input
       hx-patch="/todos/{{ .ID }}"
       hx-target="#todo-{{ .ID }}"
       hx-swap="outerHTML"
-      hx-disabled-elt="this"
+      hx-disabled-elt="#todo-{{ .ID }} *"
+      class="h-6 w-6 cursor-pointer text-blue-600 focus:ring-0 disabled:opacity-50"
       type="checkbox"
       id="todo-completed-{{ .ID }}"
       name="completed"
+      aria-labelledby="todo-label-{{ .ID }}"
       {{ if .Completed }}checked{{ end }}
     />
-    <label for="todo-completed-{{ .ID }}">{{ .Content }}</label>
+    <label
+      {{ if .Completed }}
+        class="flex-1 text-lg text-gray-500 line-through"
+      {{ else }}
+        class="flex-1 text-lg text-gray-800"
+      {{ end }}
+      id="todo-label-{{ .ID }}"
+      for="todo-completed-{{ .ID }}"
+    >
+      {{ .Content }}
+    </label>
     <button
       hx-delete="/todos/{{ .ID }}"
       hx-target="#todo-{{ .ID }}"
       hx-swap="outerHTML"
-      hx-disabled-elt="this"
+      hx-disabled-elt="#todo-{{ .ID }} *"
+      class="leading-none text-gray-400 hover:text-gray-600 focus:ring-0 disabled:cursor-pointer disabled:opacity-50"
+      id="todo-delete-{{ .ID }}"
+      aria-label="Delete todo: {{ .Content }}"
     >
       ✖️
     </button>
+    <script>
+      me().addEventListener('htmx:beforeSwap', (event) => {
+        event.detail.shouldSwap = true;
+      });
+    </script>
   </li>
 {{ end }}

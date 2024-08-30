@@ -1,23 +1,22 @@
 {
   "type": "module",
   "scripts": {
-    "build": "bun run build:css && bun run build:ts",
+    "build": "bun run build:css && bun run build:js",
     "build:css": "NODE_ENV=production bun x --bun tailwindcss --input ./main.css --output ./build/main.css --minify",
-    "build:ts": "bun x --bun tsc && NODE_ENV=production bun build ./main.ts --outdir=./build --sourcemap=linked --minify",
-    "dev": "bun x --bun concurrently \"bun run dev:css\" \"bun run dev:ts\" --kill-others",
+    "build:js": "NODE_ENV=production bun build ./main.js --outdir=./build --sourcemap=linked --minify",
+    "dev": "bun x --bun concurrently \"bun run dev:css\" \"bun run dev:js\" --kill-others",
     "dev:css": "NODE_ENV=development bun x --bun tailwindcss --input ./main.css --output ./build/main.css --watch",
-    "dev:ts": "NODE_ENV=development bun build ./main.ts --outdir=./build --sourcemap=inline --watch"
+    "dev:js": "NODE_ENV=development bun build ./main.js --outdir=./build --sourcemap=inline --watch"
   },
   "dependencies": {
-    "htmx.org": "^1.9.12"
+    "htmx.org": "^2.0.3",
+    "notyf": "^3.10.0"
   },
   "devDependencies": {
-    "@types/bun": "^1.1.8",
     "concurrently": "^8.2.2",
     "prettier": "^3.3.3",
     "prettier-plugin-go-template": "^0.0.15",
     "prettier-plugin-tailwindcss": "^0.5.14",
-    "tailwindcss": "^3.4.10",
-    "typescript": "^5.5.4"
+    "tailwindcss": "^3.4.10"
   }
 }
