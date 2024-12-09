@@ -86,22 +86,22 @@ func TodosRoute(w http.ResponseWriter, r *http.Request) {
 		content := r.FormValue("content")
 		statement, err := db.Prepare("INSERT INTO todos (completed, content) VALUES (?, ?)")
 		if err != nil {
-			setTriggerHeader(w, TriggerHeader{ErrorNotification: stringPointer("Todo not added!")})
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			setTriggerHeader(w, TriggerHeader{ErrorNotification: strPtr("Todo not added!")})
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
 		result, err := statement.Exec(false, content)
 		if err != nil {
-			setTriggerHeader(w, TriggerHeader{ErrorNotification: stringPointer("Todo not added!")})
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			setTriggerHeader(w, TriggerHeader{ErrorNotification: strPtr("Todo not added!")})
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
 		id, err := result.LastInsertId()
 		if err != nil {
-			setTriggerHeader(w, TriggerHeader{ErrorNotification: stringPointer("Todo not added!")})
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			setTriggerHeader(w, TriggerHeader{ErrorNotification: strPtr("Todo not added!")})
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
@@ -109,12 +109,12 @@ func TodosRoute(w http.ResponseWriter, r *http.Request) {
 		row := db.QueryRow("SELECT * FROM todos WHERE id = ?", id)
 		err = row.Scan(&todo.ID, &todo.Completed, &todo.Content)
 		if err != nil {
-			setTriggerHeader(w, TriggerHeader{ErrorNotification: stringPointer("Todo not added!")})
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			setTriggerHeader(w, TriggerHeader{ErrorNotification: strPtr("Todo not added!")})
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
-		setTriggerHeader(w, TriggerHeader{SuccessNotification: stringPointer("Todo added successfully!")})
+		setTriggerHeader(w, TriggerHeader{SuccessNotification: strPtr("Todo added successfully!")})
 		tmpl.ExecuteTemplate(w, "todo-item", todo)
 		return
 	}
@@ -122,7 +122,7 @@ func TodosRoute(w http.ResponseWriter, r *http.Request) {
 	var todos []Todo
 	rows, err := db.Query("SELECT * FROM todos")
 	if err != nil {
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	defer rows.Close()
@@ -132,7 +132,7 @@ func TodosRoute(w http.ResponseWriter, r *http.Request) {
 
 		err := rows.Scan(&todo.ID, &todo.Completed, &todo.Content)
 		if err != nil {
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
@@ -145,20 +145,20 @@ func TodosRoute(w http.ResponseWriter, r *http.Request) {
 func TodoRoute(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	if r.Method == "DELETE" {
 		statement, err := db.Prepare("DELETE FROM todos WHERE id = ?")
 		if err != nil {
-			setTriggerHeader(w, TriggerHeader{ErrorNotification: stringPointer("Todo not updated!")})
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			setTriggerHeader(w, TriggerHeader{ErrorNotification: strPtr("Todo not updated!")})
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
 		statement.Exec(id)
-		setTriggerHeader(w, TriggerHeader{SuccessNotification: stringPointer("Todo updated successfully!")})
+		setTriggerHeader(w, TriggerHeader{SuccessNotification: strPtr("Todo updated successfully!")})
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
@@ -168,8 +168,8 @@ func TodoRoute(w http.ResponseWriter, r *http.Request) {
 	completed := r.FormValue("completed") == "on"
 	statement, err := db.Prepare("UPDATE todos SET completed = ? WHERE id = ?")
 	if err != nil {
-		setTriggerHeader(w, TriggerHeader{ErrorNotification: stringPointer("Todo not updated!")})
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		setTriggerHeader(w, TriggerHeader{ErrorNotification: strPtr("Todo not updated!")})
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -179,12 +179,12 @@ func TodoRoute(w http.ResponseWriter, r *http.Request) {
 	row := db.QueryRow("SELECT * FROM todos WHERE id = ?", id)
 	err = row.Scan(&todo.ID, &todo.Completed, &todo.Content)
 	if err != nil {
-		setTriggerHeader(w, TriggerHeader{ErrorNotification: stringPointer("Todo not updated!")})
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		setTriggerHeader(w, TriggerHeader{ErrorNotification: strPtr("Todo not updated!")})
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	setTriggerHeader(w, TriggerHeader{SuccessNotification: stringPointer("Todo updated successfully!")})
+	setTriggerHeader(w, TriggerHeader{SuccessNotification: strPtr("Todo updated successfully!")})
 	tmpl.ExecuteTemplate(w, "todo-item", todo)
 }
 
@@ -198,6 +198,6 @@ func setTriggerHeader(w http.ResponseWriter, t TriggerHeader) {
 	w.Header().Set("hx-trigger", string(j))
 }
 
-func stringPointer(s string) *string {
+func strPtr(s string) *string {
 	return &s
 }
