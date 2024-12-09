@@ -76,6 +76,7 @@ func main() {
 }
 
 func RootRoute(w http.ResponseWriter, _ *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	tmpl.ExecuteTemplate(w, "root", nil)
 }
 
@@ -115,6 +116,7 @@ func TodosRoute(w http.ResponseWriter, r *http.Request) {
 		}
 
 		setTriggerHeader(w, TriggerHeader{SuccessNotification: strPtr("Todo added successfully!")})
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		tmpl.ExecuteTemplate(w, "todo-item", todo)
 		return
 	}
@@ -139,6 +141,7 @@ func TodosRoute(w http.ResponseWriter, r *http.Request) {
 		todos = append(todos, todo)
 	}
 
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	tmpl.ExecuteTemplate(w, "todos-list", todos)
 }
 
@@ -185,6 +188,7 @@ func TodoRoute(w http.ResponseWriter, r *http.Request) {
 	}
 
 	setTriggerHeader(w, TriggerHeader{SuccessNotification: strPtr("Todo updated successfully!")})
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	tmpl.ExecuteTemplate(w, "todo-item", todo)
 }
 
