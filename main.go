@@ -41,7 +41,7 @@ func main() {
 	}
 	defer db.Close()
 
-	statement, err := db.Prepare(`CREATE TABLE IF NOT EXISTS todos (
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS todos (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		completed BOOLEAN NOT NULL,
 		content TEXT NOT NULL
@@ -49,8 +49,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-	statement.Exec()
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -85,14 +83,7 @@ func TodosRoute(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
 
 		content := r.FormValue("content")
-		statement, err := db.Prepare("INSERT INTO todos (completed, content) VALUES (?, ?)")
-		if err != nil {
-			setTriggerHeader(w, TriggerHeader{ErrorNotification: strPtr("Todo not added!")})
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		result, err := statement.Exec(false, content)
+		result, err := db.Exec("INSERT INTO todos (completed, content) VALUES (?, ?)", false, content)
 		if err != nil {
 			setTriggerHeader(w, TriggerHeader{ErrorNotification: strPtr("Todo not added!")})
 			w.WriteHeader(http.StatusInternalServerError)
@@ -131,13 +122,11 @@ func TodosRoute(w http.ResponseWriter, r *http.Request) {
 
 	for rows.Next() {
 		var todo Todo
-
 		err := rows.Scan(&todo.ID, &todo.Completed, &todo.Content)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-
 		todos = append(todos, todo)
 	}
 
@@ -153,14 +142,12 @@ func TodoRoute(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method == "DELETE" {
-		statement, err := db.Prepare("DELETE FROM todos WHERE id = ?")
+		_, err := db.Exec("DELETE FROM todos WHERE id = ?", id)
 		if err != nil {
 			setTriggerHeader(w, TriggerHeader{ErrorNotification: strPtr("Todo not deleted!")})
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-
-		statement.Exec(id)
 		setTriggerHeader(w, TriggerHeader{SuccessNotification: strPtr("Todo deleted successfully!")})
 		w.WriteHeader(http.StatusNoContent)
 		return
@@ -169,14 +156,12 @@ func TodoRoute(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
 	completed := r.FormValue("completed") == "on"
-	statement, err := db.Prepare("UPDATE todos SET completed = ? WHERE id = ?")
+	_, err = db.Exec("UPDATE todos SET completed = ? WHERE id = ?", completed, id)
 	if err != nil {
 		setTriggerHeader(w, TriggerHeader{ErrorNotification: strPtr("Todo not updated!")})
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
-	statement.Exec(completed, id)
 
 	var todo Todo
 	row := db.QueryRow("SELECT * FROM todos WHERE id = ?", id)
