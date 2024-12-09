@@ -8,15 +8,24 @@
     "dev:css": "NODE_ENV=development bun x --bun tailwindcss --input ./main.css --output ./build/main.css --watch",
     "dev:js": "NODE_ENV=development bun build ./main.js --outdir=./build --sourcemap=inline --watch"
   },
+  "prettier": {
+    "plugins": [
+      "prettier-plugin-go-template",
+      "prettier-plugin-tailwindcss"
+    ],
+    "singleQuote": true,
+    "trailingComma": "all"
+  },
   "dependencies": {
     "htmx.org": "^2.0.3",
-    "notyf": "^3.10.0"
+    "notyf": "^3.10.0",
+    "tailwindcss": "^4.0.0-beta.6"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2",
-    "prettier": "^3.3.3",
+    "@tailwindcss/cli": "^4.0.0-beta.6",
+    "concurrently": "^9.1.0",
+    "prettier": "^3.4.2",
     "prettier-plugin-go-template": "^0.0.15",
-    "prettier-plugin-tailwindcss": "^0.5.14",
-    "tailwindcss": "^3.4.10"
+    "prettier-plugin-tailwindcss": "^0.6.9"
   }
 }

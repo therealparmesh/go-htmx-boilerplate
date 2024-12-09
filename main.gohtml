@@ -9,7 +9,7 @@
       <link href="./static/main.css" rel="stylesheet" />
       <script src="./static/main.js"></script>
     </head>
-    <body class="bg-white font-sans">
+    <body>
       {{ template "body-content" . }}
     </body>
   </html>
@@ -21,7 +21,7 @@
       class="flex w-full max-w-md flex-col gap-8 p-8"
       aria-labelledby="main-header"
     >
-      <h1 id="main-header" class="text-center text-4xl font-normal">todos</h1>
+      <h1 id="main-header" class="text-center text-4xl">todos</h1>
       <form
         hx-post="/todos"
         hx-target="#todo-list-container"
@@ -99,7 +99,7 @@
       hx-target="#todo-{{ .ID }}"
       hx-swap="outerHTML"
       hx-disabled-elt="#todo-{{ .ID }} *"
-      class="leading-none text-gray-400 hover:text-gray-600 focus:ring-0 disabled:cursor-pointer disabled:opacity-50"
+      class="cursor-pointer leading-none text-gray-400 hover:text-gray-600 focus:ring-0 disabled:opacity-50"
       id="todo-delete-{{ .ID }}"
       aria-label="Delete todo: {{ .Content }}"
     >
