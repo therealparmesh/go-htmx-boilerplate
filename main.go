@@ -152,13 +152,13 @@ func TodoRoute(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "DELETE" {
 		statement, err := db.Prepare("DELETE FROM todos WHERE id = ?")
 		if err != nil {
-			setTriggerHeader(w, TriggerHeader{ErrorNotification: strPtr("Todo not updated!")})
+			setTriggerHeader(w, TriggerHeader{ErrorNotification: strPtr("Todo not deleted!")})
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
 		statement.Exec(id)
-		setTriggerHeader(w, TriggerHeader{SuccessNotification: strPtr("Todo updated successfully!")})
+		setTriggerHeader(w, TriggerHeader{SuccessNotification: strPtr("Todo deleted successfully!")})
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
