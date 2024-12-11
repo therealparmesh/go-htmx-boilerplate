@@ -1,9 +1,12 @@
 import htmx from 'htmx.org';
 import { Notyf } from 'notyf';
 
-const me = () => window.document.currentScript?.parentElement;
 window.htmx = htmx;
-window.me = me;
+
+window.me = (previous) =>
+  previous
+    ? window.document.currentScript?.previousElementSibling
+    : window.document.currentScript?.parentElement;
 
 document.addEventListener('DOMContentLoaded', () => {
   const notyf = new Notyf({ position: { x: 'right', y: 'top' } });
