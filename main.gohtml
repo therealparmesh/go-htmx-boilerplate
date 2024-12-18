@@ -44,11 +44,7 @@
           Enter a todo to add it to the list
         </p>
         <script>
-          const form = me();
-
-          form.addEventListener('htmx:afterRequest', () => {
-            form.reset();
-          });
+          me().addEventListener('htmx:afterRequest', me().reset);
         </script>
       </form>
       <ul
